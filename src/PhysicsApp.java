@@ -20,7 +20,7 @@ public class PhysicsApp {
     private JComboBox<String> presetBox;
 
     // Core Objects
-    private final MassSpringSim sim = new MassSpringSim();      // the physics "world"
+    private final MassSpringSim sim = new MassSpringSim();      // the physics "world" (added later)
 
     // Keeps the latest valid parameters so we can revert on bad input
     private final Map<String, Double> lastGood = new HashMap<>();
