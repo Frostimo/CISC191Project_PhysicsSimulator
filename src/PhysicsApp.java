@@ -45,14 +45,14 @@ public class PhysicsApp {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        // ---- TOP TOOLBAR (buttons)
+        // ---- TOP TOOLBAR (buttons) (functionality added later)
         JToolBar bar = new JToolBar();
         bar.setFloatable(false);
         JButton runBtn   = new JButton("Run ⏵");
         JButton pauseBtn = new JButton("Pause ⏸");
         JButton stepBtn  = new JButton("Step ⏭");
         JButton resetBtn = new JButton("Reset ⟲");
-        JButton saveBtn  = new JButton("Save CSV ⤓");
+        JButton saveBtn  = new JButton("Save CSV ⤓"); 
         bar.add(runBtn); bar.add(pauseBtn); bar.add(stepBtn); bar.add(resetBtn); bar.addSeparator(); bar.add(saveBtn);
         frame.add(bar, BorderLayout.NORTH);
 

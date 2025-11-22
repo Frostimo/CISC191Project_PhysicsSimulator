@@ -10,7 +10,7 @@ import java.util.function.DoublePredicate;
  * state by a small time step, provides a snapshot for logging/overlays,
  * and knows how to draw itself onto a Graphics2D canvas.
  */
-public class MassSpringSim {
+public class MassSpringSim implements SimEngine.SimModel{
     // PHYSICS PARAMETERS
     private double m, k, c;          // m = mass, k = spring constant, c = damping >= 0
 
@@ -70,6 +70,8 @@ public class MassSpringSim {
         double PE = 0.5 * k * x * x;         // spring potential energy
         return new double[]{ time, x, v, a, KE, PE, KE+PE };
     }
+    
+    public void render(Graphics2D g2, Dimension size) {} // this is for the physics renderer later on
     
     // A way to read and validate a double from the params map. Currently only used for newParams.
     private static double mustGet(Map<String, Double> m, String key, DoublePredicate ok, String err){
