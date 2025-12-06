@@ -25,6 +25,7 @@ public class DataSet<T> {
     /**
      * Write CSV to disk with a header line (if provided).
      * If the row type is double[], each number becomes a column.
+     * @param header e.g., {"t","x","v","a","KE","PE","E"}; may be null.
      */
     public void toCSV(File file, String[] header) throws IOException {
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {

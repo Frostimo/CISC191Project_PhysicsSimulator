@@ -11,7 +11,8 @@ import java.util.function.DoublePredicate;
  * and knows how to draw itself onto a Graphics2D canvas.
  */
 public class MassSpringSim implements SimEngine.SimModel{
-    // PHYSICS PARAMETERS
+   
+	// PHYSICS PARAMETERS
     private double m, k, c;          // m = mass, k = spring constant, c = damping >= 0
 
     // SIMULATION STATE
@@ -28,6 +29,7 @@ public class MassSpringSim implements SimEngine.SimModel{
      * m>0, k>0, c>=0; initial conditions x0 and v0.
      * Also resets time back to zero.
      */
+    @Override
     public void reset(Map<String, Double> newParams) {
         // Validate and extract m and k (must be positive)
         m  = mustGet(newParams, "m",  d -> d > 0, "`m` must be > 0");
@@ -50,6 +52,7 @@ public class MassSpringSim implements SimEngine.SimModel{
      *   v <- v + a*dt
      *   x <- x + v*dt   (using the new v)
      */
+    @Override
     public void step(double dt) {
         double a = -(c/m) * v - (k/m) * x; // acceleration from damping and spring force
         v += a * dt;                     // first update velocity
@@ -64,6 +67,7 @@ public class MassSpringSim implements SimEngine.SimModel{
      * and overlays: [time, x, v, a, KE, PE, E]. The GUI will have
      * a place that shows the current values (added later).
      */
+    @Override
     public double[] snapshot() {
         double a  = -(c/m) * v - (k/m) * x;
         double KE = 0.5 * m * v * v;         // kinetic energy
