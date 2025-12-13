@@ -4,85 +4,125 @@ import java.util.function.DoublePredicate;
 
 /**
  * MassSpringSim
- * 
- * This class is the "world" of the app. It stores the physics parameters,
- * the current state (position/velocity/time), knows how to advance the
- * state by a small time step, provides a snapshot for logging/overlays,
- * and knows how to draw itself onto a Graphics2D canvas.
+ * -------------
+ * A concrete 1D mass–spring (with optional damping) simulation.
+ * Implements SimEngine.SimModel so SimEngine can drive it polymorphically.
+ * Responsibilities:
+ *  - Holds parameters (m, k, c) and state (x, v, time).
+ *  - Knows how to step the physics forward.
+ *  - Provides a snapshot for logging and overlay text.
+ *  - Knows how to draw itself onto a Graphics2D canvas.
  */
-public class MassSpringSim implements SimEngine.SimModel{
-   
-	// PHYSICS PARAMETERS
-    private double m, k, c;          // m = mass, k = spring constant, c = damping >= 0
 
-    // SIMULATION STATE
-    private double x, v, time;       // x = displacement (m), v = velocity (m/s), time (s)
+public class MassSpringSim implements SimEngine.SimModel {
 
-    // This is for later on when I add the animation part (added later)
-    private final double pixelsPerMeter = 200.0; // scale: how many screen pixels equal 1 meter
-    private final int leftMarginPx = 80;         // space between anchor and x=0 reference
+    // ===== Physics Parameters (set by reset(...)) =====
+    private double m, k, c;      // mass, spring constant, damping (>=0)
 
-    /**
-     * reset(newParams)
-     * 
-     * Reads the parameters from a map passed in by the GUI/controller (added later):
-     * m>0, k>0, c>=0; initial conditions x0 and v0.
-     * Also resets time back to zero.
-     */
+    // ===== State (changes during stepping) =====
+    private double x, v, time;   // displacement (m), velocity (m/s), time (s)
+
+    // ===== Visual settings (drawing only) =====
+    private final double pixelsPerMeter = 200.0; // scale: meters → pixels
+    private final int leftMarginPx = 80;         // space from anchor to x=0 reference
+
+    /** Initialize parameters + initial conditions; also resets the clock to t=0. */
     @Override
-    public void reset(Map<String, Double> newParams) {
-        // Validate and extract m and k (must be positive)
+    public void reset(Map<String, Double> newParams) throws IllegalArgumentException {
+        // Validate required positives
         m  = mustGet(newParams, "m",  d -> d > 0, "`m` must be > 0");
         k  = mustGet(newParams, "k",  d -> d > 0, "`k` must be > 0");
-        // Damping is allowed to be zero
+
+        // Damping can be zero; use 0 if missing
         c  = Math.max(0.0, newParams.getOrDefault("c", 0.0));
-        // Initial displacement/velocity (defaults if not supplied)
+
+        // Initial conditions (defaults if not provided)
         x  = newParams.getOrDefault("x0", 0.1);
         v  = newParams.getOrDefault("v0", 0.0);
-        // Start the clock over (clock added in GUI later to show how much time passed)
+
+        // Reset time
         time = 0.0;
     }
 
     /**
-     * step(dt)
-     * 
-     * Advances the physical values by a small time step dt using
-     * semi-implicit Euler integration:
-     *   a = -(c/m) v - (k/m) x
+     * Advance physics by dt seconds using semi-implicit Euler:
+     *   a = -(c/m)*v - (k/m)*x
      *   v <- v + a*dt
-     *   x <- x + v*dt   (using the new v)
+     *   x <- x + v*dt   (using the updated v)
      */
     @Override
     public void step(double dt) {
-        double a = -(c/m) * v - (k/m) * x; // acceleration from damping and spring force
-        v += a * dt;                     // first update velocity
-        x += v * dt;                     // then position using updated velocity
-        time += dt;                    // advance the clock
+        double a = -(c/m)*v - (k/m)*x;
+        v += a * dt;
+        x += v * dt;
+        time += dt;
+    }
+
+    /** Return [time, x, v, a, KE, PE, E] for logging and on-screen text. */
+    @Override
+    public double[] snapshot() {
+        double a  = -(c/m)*v - (k/m)*x;
+        double KE = 0.5 * m * v * v;
+        double PE = 0.5 * k * x * x;
+        return new double[]{ time, x, v, a, KE, PE, KE + PE };
     }
 
     /**
-     * snapshot()
-     * 
-     * Returns a small array of commonly needed values for logging 
-     * and overlays: [time, x, v, a, KE, PE, E]. The GUI will have
-     * a place that shows the current values (added later).
+     * Draw current state on the given canvas.
+     * Purely visual—does not change physics state.
      */
     @Override
-    public double[] snapshot() {
-        double a  = -(c/m) * v - (k/m) * x;
-        double KE = 0.5 * m * v * v;         // kinetic energy
-        double PE = 0.5 * k * x * x;         // spring potential energy
-        return new double[]{ time, x, v, a, KE, PE, KE+PE };
+    public void render(Graphics2D g2, Dimension size) {
+        // Background + antialiasing for smooth lines
+        g2.setColor(Color.WHITE);
+        g2.fillRect(0, 0, size.width, size.height);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Center baseline for reference
+        int cy = size.height / 2;
+        g2.setColor(new Color(230, 230, 230));
+        g2.fillRect(0, cy - 1, size.width, 2);
+
+        // Fixed anchor at the left
+        g2.setColor(Color.DARK_GRAY);
+        g2.fillRect(20, cy - 30, 20, 60);
+
+        // Compute current block position in pixels from displacement x (meters)
+        int anchorX = 40, blockW = 60, blockH = 40;
+        int blockX = (int)(anchorX + leftMarginPx + x * pixelsPerMeter);
+        int span   = Math.max(10, blockX - anchorX);
+
+        // Draw a zig-zag spring between anchor and block
+        g2.setStroke(new BasicStroke(2f));
+        g2.setColor(new Color(90, 90, 90));
+        int coils = 8, amp = 12, px = anchorX, py = cy;
+        for (int i = 1; i <= coils * 2; i++) {
+            int xi = anchorX + (i * span) / (coils * 2);
+            int yi = cy + ((i % 2 == 0) ? -amp : amp);
+            g2.drawLine(px, py, xi, yi);
+            px = xi; py = yi;
+        }
+        g2.drawLine(px, py, blockX, cy);
+
+        // Draw the block
+        int by = cy - blockH / 2;
+        g2.setColor(new Color(60, 120, 200));
+        g2.fillRoundRect(blockX, by, blockW, blockH, 10, 10);
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(blockX, by, blockW, blockH, 10, 10);
+
+        // Small text overlay with t, x, v
+        double[] s = snapshot();
+        g2.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        g2.setColor(new Color(20, 20, 20));
+        g2.drawString(String.format("t=%.2fs  x=%.3fm  v=%.3fm/s", s[0], s[1], s[2]), 10, 18);
     }
-    
-    public void render(Graphics2D g2, Dimension size) {} // this is for the physics renderer later on
-    
-    // A way to read and validate a double from the params map. Currently only used for newParams.
-    private static double mustGet(Map<String, Double> m, String key, DoublePredicate ok, String err){
+
+    // ---- Helper: look up and validate a required double param ----
+    private static double mustGet(Map<String, Double> m, String key,
+                                  DoublePredicate ok, String err) {
         Double v = m.get(key);
-        
-        // Checks if the value doesn't exist or the input test fails
-        if (v==null || !ok.test(v)) throw new IllegalArgumentException(err);
+        if (v == null || !ok.test(v)) throw new IllegalArgumentException(err);
         return v;
     }
 }
