@@ -2,13 +2,19 @@ import java.io.*;
 import java.util.*;
 
 /**
+ * Lead Author(s):
+ * @author Arthur Nguyen
+ * 
+ * Version/date: December 18, 2025
+ * 
  * DataSet<T>
- * ----------
+ * 
  * A tiny time-series "notebook":
  *  - times:   holds the time column (double)
  *  - rows:    holds the per-step data object (here we use double[] rows)
  * Provides clear(), add(time,row), size(), and toCSV(file, header).
  */
+
 public class DataSet<T> {
     private final List<Double> times = new ArrayList<>();
     private final List<T> rows   = new ArrayList<>();
@@ -25,7 +31,7 @@ public class DataSet<T> {
     /**
      * Write CSV to disk with a header line (if provided).
      * If the row type is double[], each number becomes a column.
-     * @param header e.g., {"t","x","v","a","KE","PE","E"}; may be null.
+     * @param header {"t","x","v","a","KE","PE","E"} may be null.
      */
     public void toCSV(File file, String[] header) throws IOException {
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)))) {

@@ -2,13 +2,19 @@ import javax.swing.*;
 import java.util.Map;
 
 /**
+ * Lead Author(s):
+ * @author Arthur Nguyen
+ * 
+ * Version/date: December 18, 2025
+ * 
  * SimEngine
- * ---------
+ * 
  * The "timekeeper" for the app.
  * - Drives a simulation forward at a fixed time step (dt) using a Swing Timer.
  * - Logs each step's snapshot to a DataSet (for CSV saving).
  * - Exposes controls the GUI calls: start, pause, stepOnce, reset.
  */
+
 public class SimEngine {
 
     /** Contract the engine needs from any simulation model. */

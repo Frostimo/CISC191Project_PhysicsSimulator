@@ -6,8 +6,13 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * Lead Author(s):
+ * @author Arthur Nguyen
+ * 
+ * Version/date: December 18, 2025
+ * 
  * PhysicsApp
- * ----------
+ * 
  * Builds the GUI (window, fields, buttons, canvas, status bar),
  * wires user actions to the engine/model, and manages save/export.
  * 
@@ -16,6 +21,7 @@ import java.util.List;
  *  - Pause/Step/Reset control the engine.
  *  - Save CSV writes the DataSet log to disk.
  */
+
 public class PhysicsApp {
     // ===== GUI widgets =====
     private JFrame frame;

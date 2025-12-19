@@ -3,8 +3,13 @@ import java.util.Map;
 import java.util.function.DoublePredicate;
 
 /**
+ *  * Lead Author(s):
+ * @author Arthur Nguyen
+ * 
+ * Version/date: December 18, 2025
+ * 
  * MassSpringSim
- * -------------
+ * 
  * A concrete 1D mass–spring (with optional damping) simulation.
  * Implements SimEngine.SimModel so SimEngine can drive it polymorphically.
  * Responsibilities:
